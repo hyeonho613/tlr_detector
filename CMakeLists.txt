@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(ros2_multi_launcher)
+project(tlr_detector)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -18,37 +18,59 @@ include_directories(
   include
 )
 
-# Add the executable
-add_executable(multi_launcher_node
-  src/multi_launcher_node.cpp
+# Add external_launcher_node executable
+add_executable(launcher_node
+  src/launcher_node.cpp
+)
+ament_target_dependencies(launcher_node rclcpp)
+install(TARGETS
+  launcher_node
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-# Link against necessary libraries
-ament_target_dependencies(multi_launcher_node
+# Add image_processor_node executable
+add_executable(tlr_detector_node
+  src/tlr_detector_node.cpp
+)
+ament_target_dependencies(tlr_detector_node
   rclcpp
   vision_msgs
   ultralytics_ros
   cv_bridge
 )
-
-target_link_libraries(multi_launcher_node
+target_link_libraries(tlr_detector_node
   ${OpenCV_LIBS}
 )
-
-# Install the executable
 install(TARGETS
-  multi_launcher_node
+  tlr_detector_node
   DESTINATION lib/${PROJECT_NAME}
+)
+
+# Add traffic_light_hsv_analyzer_node executable
+add_executable(tlr_hsv_node
+  src/tlr_hsv_node.cpp
+)
+ament_target_dependencies(tlr_hsv_node
+  rclcpp
+  sensor_msgs
+  std_msgs
+  cv_bridge
+)
+target_link_libraries(tlr_hsv_node
+  ${OpenCV_LIBS}
+)
+install(TARGETS
+  tlr_hsv_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
 )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()

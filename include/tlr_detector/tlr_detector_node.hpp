@@ -1,5 +1,5 @@
-#ifndef ROS2_MULTI_LAUNCHER__MULTI_LAUNCHER_NODE_HPP_
-#define ROS2_MULTI_LAUNCHER__MULTI_LAUNCHER_NODE_HPP_
+#ifndef TLR_DETECTOR__TLR_DETECTOR_NODE_HPP_
+#define TLR_DETECTOR__TLR_DETECTOR_NODE_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <ultralytics_ros/msg/yolo_result.hpp>
@@ -10,24 +10,18 @@
 #include <opencv2/opencv.hpp>
 
 #include <string>
-#include <thread>
-#include <cstdlib>
 #include <mutex>
 
-namespace ros2_multi_launcher
+namespace tlr_detector
 {
 
-class MultiLauncherNode : public rclcpp::Node
+class TlrDetectorNode : public rclcpp::Node
 {
 public:
-  MultiLauncherNode();
-  ~MultiLauncherNode();
+  TlrDetectorNode();
+  ~TlrDetectorNode();
 
 private:
-  void run_shell_command(const std::string& command);
-  void launch_v4l2_camera();
-  void launch_ultralytics_ros_tracker();
-
   // Callback for /yolo_result topic
   void yolo_result_callback(const ultralytics_ros::msg::YoloResult::SharedPtr msg);
   // Callback for /image_raw topic
@@ -49,6 +43,6 @@ private:
   std::mutex bbox_mutex_;
 };
 
-} // namespace ros2_multi_launcher
+} // namespace tlr_detector
 
-#endif // ROS2_MULTI_LAUNCHER__MULTI_LAUNCHER_NODE_HPP_
+#endif // ROS2_MULTI_LAUNCHER__TLR_DETECTOR_NODE_HPP_
