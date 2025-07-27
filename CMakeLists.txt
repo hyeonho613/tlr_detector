@@ -12,6 +12,7 @@ find_package(vision_msgs REQUIRED)
 find_package(ultralytics_ros REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(autoware_adapi_v1_msgs REQUIRED)
 
 # Add the include directory
 include_directories(
@@ -61,6 +62,20 @@ target_link_libraries(tlr_hsv_node
 )
 install(TARGETS
   tlr_hsv_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Add traffic_light_mode_changer executable
+add_executable(traffic_light_mode_changer
+  src/traffic_light_mode_changer.cpp
+)
+ament_target_dependencies(traffic_light_mode_changer
+  rclcpp
+  std_msgs
+  autoware_adapi_v1_msgs
+)
+install(TARGETS
+  traffic_light_mode_changer
   DESTINATION lib/${PROJECT_NAME}
 )
 

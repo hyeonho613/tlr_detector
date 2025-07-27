@@ -24,4 +24,11 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True, # Required for output to be visible
         ),
+        Node(
+            package='tlr_detector',
+            executable='traffic_light_mode_changer',
+            name='traffic_light_mode_changer',
+            output='screen',
+            emulate_tty=True, # Required for output to be visible
+        ),
     ])
