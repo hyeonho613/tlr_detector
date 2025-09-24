@@ -1,0 +1,60 @@
+# tlr_hsv_params.yaml
+#
+# 이 파일은 tlr_hsv_node에서 신호등 색상 인식을 위한 HSV(Hue, Saturation, Value) 범위 값을 정의합니다.
+#
+# HSV 값 범위:
+#   - Hue (색상): 0 ~ 179 (OpenCV 기준)
+#     - 0 (또는 179에 가까운 값): 빨간색
+#     - 약 30: 노란색
+#     - 약 60: 초록색
+#     - 약 120: 파란색
+#   - Saturation (채도): 0 ~ 255
+#   - Value (명도): 0 ~ 255
+#
+# --- 빨간색 (RED) ---
+# 빨간색은 Hue 스펙트럼의 양쪽 끝에 걸쳐 있으므로, 두 개의 범위로 정의됩니다.
+# red_h_min1 ~ red_h_max1: Hue 스펙트럼의 낮은 쪽 (0도 근처)
+# red_h_min2 ~ red_h_max2: Hue 스펙트럼의 높은 쪽 (179도 근처)
+#
+# --- 노란색 (YELLOW) ---
+#
+# --- 초록색 (GREEN) ---
+#
+# 파라미터 수정 방법:
+# 1. 아래의 각 색상별 min/max 값들을 원하는 범위로 수정합니다.
+#    - H (Hue): 색상 자체를 조절합니다.
+#    - S (Saturation): 색상의 진하기를 조절합니다. (낮으면 회색에 가까워짐)
+#    - V (Value): 색상의 밝기를 조절합니다. (낮으면 어두워짐)
+# 2. 수정 후에는 ROS2 워크스페이스를 다시 빌드해야 변경사항이 적용됩니다.
+#    `colcon build` 명령어를 실행해주세요.
+# 3. 빌드 후 `ros2 launch tlr_detector tlr.launch.py`를 다시 실행하여 결과를 확인합니다.
+#
+/**:
+  ros__parameters:
+    red_h_min1: 0
+    red_s_min1: 100
+    red_v_min1: 100
+    red_h_max1: 10
+    red_s_max1: 255
+    red_v_max1: 255
+
+    red_h_min2: 160
+    red_s_min2: 100
+    red_v_min2: 100
+    red_h_max2: 180
+    red_s_max2: 255
+    red_v_max2: 255
+
+    yellow_h_min: 20
+    yellow_s_min: 100
+    yellow_v_min: 100
+    yellow_h_max: 40
+    yellow_s_max: 255
+    yellow_v_max: 255
+
+    green_h_min: 50
+    green_s_min: 100
+    green_v_min: 100
+    green_h_max: 80
+    green_s_max: 255
+    green_v_max: 255

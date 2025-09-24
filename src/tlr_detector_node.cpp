@@ -15,7 +15,7 @@ TlrDetectorNode::TlrDetectorNode()
     "/traffic_light_bbox", 10);
 
   camera_raw_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-    "/image_raw", 10, std::bind(&TlrDetectorNode::camera_raw_callback, this, std::placeholders::_1));
+    "/image_raw", rclcpp::QoS(1).best_effort(), std::bind(&TlrDetectorNode::camera_raw_callback, this, std::placeholders::_1));
 
   traffic_light_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>(
     "/traffic_light_image", 10);
@@ -30,11 +30,13 @@ TlrDetectorNode::~TlrDetectorNode()
 
 void TlrDetectorNode::yolo_result_callback(const ultralytics_ros::msg::YoloResult::SharedPtr msg)
 {
+  RCLCPP_DEBUG(this->get_logger(), "Received YOLO result.");
   bool traffic_light_found = false;
   for (const auto& detection : msg->detections.detections) {
     for (const auto& hypothesis : detection.results) {
+      // Assuming 'traffic light' is the class ID for traffic lights
       if (hypothesis.hypothesis.class_id == "traffic light") {
-        RCLCPP_INFO(this->get_logger(), "Found traffic light! Publishing bbox.");
+        RCLCPP_DEBUG(this->get_logger(), "Found traffic light! Publishing bbox.");
         traffic_light_bbox_publisher_->publish(detection.bbox);
 
         std::lock_guard<std::mutex> lock(bbox_mutex_);
@@ -51,11 +53,13 @@ void TlrDetectorNode::yolo_result_callback(const ultralytics_ros::msg::YoloResul
   if (!traffic_light_found) {
     std::lock_guard<std::mutex> lock(bbox_mutex_);
     latest_traffic_light_bbox_ = vision_msgs::msg::BoundingBox2D(); // Reset bbox if no traffic light found
+    RCLCPP_DEBUG(this->get_logger(), "No traffic light found in YOLO result.");
   }
 }
 
 void TlrDetectorNode::camera_raw_callback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
+  RCLCPP_DEBUG(this->get_logger(), "Received camera raw image.");
   vision_msgs::msg::BoundingBox2D current_bbox;
   {
     std::lock_guard<std::mutex> lock(bbox_mutex_);
@@ -97,7 +101,7 @@ void TlrDetectorNode::camera_raw_callback(const sensor_msgs::msg::Image::SharedP
         sensor_msgs::msg::Image::SharedPtr cropped_msg = cv_bridge::CvImage(
           msg->header, cv_ptr->encoding, resized_image).toImageMsg();
         traffic_light_image_publisher_->publish(*cropped_msg);
-        RCLCPP_INFO(this->get_logger(), "Published cropped and resized traffic light image.");
+        RCLCPP_DEBUG(this->get_logger(), "Published cropped and resized traffic light image.");
       } else {
         RCLCPP_WARN(this->get_logger(), "Calculated ROI is invalid after clamping: x=%d, y=%d, width=%d, height=%d. Image size: %dx%d", x, y, width, height, img_width, img_height);
       }
@@ -108,7 +112,7 @@ void TlrDetectorNode::camera_raw_callback(const sensor_msgs::msg::Image::SharedP
       RCLCPP_ERROR(this->get_logger(), "OpenCV exception: %s", e.what());
     }
   } else {
-    RCLCPP_WARN(this->get_logger(), "No valid traffic light bbox received yet (size_x or size_y <= 0).");
+    RCLCPP_DEBUG(this->get_logger(), "No valid traffic light bbox received yet (size_x or size_y <= 0)."); // Changed to INFO for less spam
   }
 }
 

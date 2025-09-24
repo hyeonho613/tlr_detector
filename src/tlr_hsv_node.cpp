@@ -6,32 +6,58 @@ namespace tlr_detector
 TlrHsvNode::TlrHsvNode()
 : Node("tlr_hsv_node")
 {
-  RCLCPP_INFO(this->get_logger(), "Starting traffic_light_hsv_analyzer_node...");
+  RCLCPP_DEBUG(this->get_logger(), "Starting traffic_light_hsv_analyzer_node...");
+
+  // Declare parameters for HSV ranges
+  this->declare_parameter<int>("red_h_min1", 0);
+  this->declare_parameter<int>("red_s_min1", 100);
+  this->declare_parameter<int>("red_v_min1", 100);
+  this->declare_parameter<int>("red_h_max1", 10);
+  this->declare_parameter<int>("red_s_max1", 255);
+  this->declare_parameter<int>("red_v_max1", 255);
+
+  this->declare_parameter<int>("red_h_min2", 160);
+  this->declare_parameter<int>("red_s_min2", 100);
+  this->declare_parameter<int>("red_v_min2", 100);
+  this->declare_parameter<int>("red_h_max2", 180);
+  this->declare_parameter<int>("red_s_max2", 255);
+  this->declare_parameter<int>("red_v_max2", 255);
+
+  this->declare_parameter<int>("yellow_h_min", 20);
+  this->declare_parameter<int>("yellow_s_min", 100);
+  this->declare_parameter<int>("yellow_v_min", 100);
+  this->declare_parameter<int>("yellow_h_max", 40);
+  this->declare_parameter<int>("yellow_s_max", 255);
+  this->declare_parameter<int>("yellow_v_max", 255);
+
+  this->declare_parameter<int>("green_h_min", 50);
+  this->declare_parameter<int>("green_s_min", 100);
+  this->declare_parameter<int>("green_v_min", 100);
+  this->declare_parameter<int>("green_h_max", 80);
+  this->declare_parameter<int>("green_s_max", 255);
+  this->declare_parameter<int>("green_v_max", 255);
+
+  // Get parameter values
+  red_min1_ = cv::Scalar(this->get_parameter("red_h_min1").as_int(), this->get_parameter("red_s_min1").as_int(), this->get_parameter("red_v_min1").as_int());
+  red_max1_ = cv::Scalar(this->get_parameter("red_h_max1").as_int(), this->get_parameter("red_s_max1").as_int(), this->get_parameter("red_v_max1").as_int());
+  red_min2_ = cv::Scalar(this->get_parameter("red_h_min2").as_int(), this->get_parameter("red_s_min2").as_int(), this->get_parameter("red_v_min2").as_int());
+  red_max2_ = cv::Scalar(this->get_parameter("red_h_max2").as_int(), this->get_parameter("red_s_max2").as_int(), this->get_parameter("red_v_max2").as_int());
+
+  yellow_min_ = cv::Scalar(this->get_parameter("yellow_h_min").as_int(), this->get_parameter("yellow_s_min").as_int(), this->get_parameter("yellow_v_min").as_int());
+  yellow_max_ = cv::Scalar(this->get_parameter("yellow_h_max").as_int(), this->get_parameter("yellow_s_max").as_int(), this->get_parameter("yellow_v_max").as_int());
+
+  green_min_ = cv::Scalar(this->get_parameter("green_h_min").as_int(), this->get_parameter("green_s_min").as_int(), this->get_parameter("green_v_min").as_int());
+  green_max_ = cv::Scalar(this->get_parameter("green_h_max").as_int(), this->get_parameter("green_s_max").as_int(), this->get_parameter("green_v_max").as_int());
 
   // Subscribe to /traffic_light_image
   traffic_light_image_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-    "/traffic_light_image", 10, std::bind(&TlrHsvNode::traffic_light_image_callback, this, std::placeholders::_1));
+    "/traffic_light_image", rclcpp::QoS(1).best_effort(), std::bind(&TlrHsvNode::traffic_light_image_callback, this, std::placeholders::_1));
 
   // Publish /traffic_light_status
   traffic_light_status_publisher_ = this->create_publisher<std_msgs::msg::String>(
     "/traffic_light_status", 10);
 
-  // Initialize HSV color ranges (tuned from autoware example)
-  // Red (hue wraps around, so two ranges are needed)
-  red_min1_ = cv::Scalar(0, 100, 100);
-  red_max1_ = cv::Scalar(10, 255, 255);
-  red_min2_ = cv::Scalar(160, 100, 100);
-  red_max2_ = cv::Scalar(180, 255, 255);
-
-  // Yellow
-  yellow_min_ = cv::Scalar(20, 100, 100);
-  yellow_max_ = cv::Scalar(40, 255, 255);
-
-  // Green
-  green_min_ = cv::Scalar(50, 100, 100);
-  green_max_ = cv::Scalar(80, 255, 255);
-
-  RCLCPP_INFO(this->get_logger(), "Subscribing to /traffic_light_image and publishing to /traffic_light_status.");
+  RCLCPP_DEBUG(this->get_logger(), "Subscribing to /traffic_light_image and publishing to /traffic_light_status.");
 }
 
 TlrHsvNode::~TlrHsvNode()
@@ -41,7 +67,7 @@ TlrHsvNode::~TlrHsvNode()
 
 void TlrHsvNode::traffic_light_image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
-  RCLCPP_INFO(this->get_logger(), "Received traffic_light_image. Image size: %dx%d, encoding: %s", msg->width, msg->height, msg->encoding.c_str());
+  RCLCPP_DEBUG(this->get_logger(), "Received traffic_light_image. Image size: %dx%d, encoding: %s", msg->width, msg->height, msg->encoding.c_str());
 
   try {
     cv_bridge::CvImagePtr cv_ptr;
@@ -61,7 +87,7 @@ void TlrHsvNode::traffic_light_image_callback(const sensor_msgs::msg::Image::Sha
     std_msgs::msg::String status_msg;
     status_msg.data = status;
     traffic_light_status_publisher_->publish(status_msg);
-    RCLCPP_INFO(this->get_logger(), "Published traffic light status: %s", status.c_str());
+    RCLCPP_DEBUG(this->get_logger(), "Published traffic light status: %s", status.c_str());
 
   } catch (const cv_bridge::Exception& e) {
     RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
@@ -88,12 +114,16 @@ std::string TlrHsvNode::analyze_hsv(const cv::Mat& hsv_image)
 
   // Determine the dominant color
   if (red_pixels > yellow_pixels && red_pixels > green_pixels) {
+    RCLCPP_DEBUG(this->get_logger(), "Detected RED (pixels: %d)", red_pixels);
     return "RED";
   } else if (yellow_pixels > red_pixels && yellow_pixels > green_pixels) {
+    RCLCPP_DEBUG(this->get_logger(), "Detected YELLOW (pixels: %d)", yellow_pixels);
     return "YELLOW";
   } else if (green_pixels > red_pixels && green_pixels > yellow_pixels) {
+    RCLCPP_DEBUG(this->get_logger(), "Detected GREEN (pixels: %d)", green_pixels);
     return "GREEN";
   } else {
+    RCLCPP_DEBUG(this->get_logger(), "Detected UNKNOWN (red: %d, yellow: %d, green: %d)", red_pixels, yellow_pixels, green_pixels);
     return "UNKNOWN"; // Or OFF
   }
 }

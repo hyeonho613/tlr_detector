@@ -31,15 +31,15 @@ void LauncherNode::run_shell_command(const std::string& command)
 
 void LauncherNode::launch_v4l2_camera()
 {
-  std::string ros2_setup_command = "source /opt/ros/humble/setup.bash && source /home/sws/yolo_ws/install/setup.bash";
-  std::string v4l2_camera_command = ros2_setup_command + " && ros2 run v4l2_camera v4l2_camera_node";
+  std::string ros2_setup_command = "source /opt/ros/humble/setup.bash";
+  std::string v4l2_camera_command = ros2_setup_command + " && ros2 launch v4l2_camera v4l2_camera.launch.py camera_name:=front image_topic:=image_raw v4l2_camera_param_path:=/home/sws/.ros/camera_info/camera_params.yaml rate_diagnostics_param_path:=/home/sws/.ros/camera_info/rate_diagnostics.yaml camera_info_url:=file:///home/sws/.ros/camera_info/gmsl2-usb3.0_conversion_kit.yaml hardware_id:='/dev/video0' use_sensor_data_qos:=True";
   std::thread(&LauncherNode::run_shell_command, this, v4l2_camera_command).detach();
 }
 
 void LauncherNode::launch_ultralytics_ros_tracker()
 {
-  std::string ros2_setup_command = "source /opt/ros/humble/setup.bash && source /home/sws/yolo_ws/install/setup.bash";
-  std::string ultralytics_ros_command = ros2_setup_command + " && ros2 launch ultralytics_ros tracker.launch.xml debug:=true"; // tracker_with_cloud.launch.xml
+  std::string ros2_setup_command = "source /opt/ros/humble/setup.bash";
+  std::string ultralytics_ros_command = ros2_setup_command + " && ros2 launch ultralytics_ros tracker.launch.xml debug:=false"; // JHH: Disabled debug image view as requested.
   std::thread(&LauncherNode::run_shell_command, this, ultralytics_ros_command).detach();
 }
 
