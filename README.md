@@ -19,9 +19,8 @@
   3. 디버그 및 확인:
 
    * 자세한 로그 확인:
-
-   1     ros2 launch tlr_detector tlr.launch.py --ros-args --log-level DEBUG
+     ros2 launch tlr_detector tlr.launch.py --ros-args --log-level DEBUG
    * 최종 신호등 인식 결과 확인:
-   1     ros2 topic echo /traffic_light_status
+     ros2 topic echo /traffic_light_status
    * 신호등만 잘라낸 이미지 시각화:
-   1     ros2 run image_view image_view --ros-args -r image:=/traffic_light_image
+     ros2 run image_view image_view --ros-args -r image:=/traffic_light_image
