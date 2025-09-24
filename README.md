@@ -5,6 +5,10 @@
    * tlr_detector (현재 작업 중인 패키지)
    * ultralytics_ros (YOLO 객체 감지)
    * v4l2_camera (카메라 이미지 발행)
+   * rclcpp (ROS2 C++ 클라이언트)
+   * sensor_msgs (이미지 메시지 등)
+   * std_msgs (문자열 메시지 등)
+   * vision_msgs (바운딩 박스 메시지)
 
   2. 외부 라이브러리:
 
@@ -16,8 +20,8 @@
 
    * 자세한 로그 확인:
 
-   $     ros2 launch tlr_detector tlr.launch.py --ros-args --log-level DEBUG
+   1     ros2 launch tlr_detector tlr.launch.py --ros-args --log-level DEBUG
    * 최종 신호등 인식 결과 확인:
-   $     ros2 topic echo /traffic_light_status
+   1     ros2 topic echo /traffic_light_status
    * 신호등만 잘라낸 이미지 시각화:
-   $     ros2 run image_view image_view --ros-args -r image:=/traffic_light_image
+   1     ros2 run image_view image_view --ros-args -r image:=/traffic_light_image
